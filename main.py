@@ -43,12 +43,18 @@ def _start_health():
         return web.Response(text="Demo bot is running")
 
     def run():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         app = web.Application()
         app.router.add_get("/", health_page)
-        web.run_app(app, host="0.0.0.0", port=port, print=None)
+        runner = web.AppRunner(app)
+        loop.run_until_complete(runner.setup())
+        site = web.TCPSite(runner, "0.0.0.0", port)
+        loop.run_until_complete(site.start())
+        print(f"[health] 0.0.0.0:{port} tinglanmoqda", flush=True)
+        loop.run_forever()
 
     threading.Thread(target=run, daemon=True).start()
-    print(f"[health] 0.0.0.0:{port} tinglanmoqda", flush=True)
 
 
 _start_health()
